@@ -8,10 +8,12 @@ import java.math.BigInteger
 
 interface HumanMethylationRepo : MongoRepository<HumanMethylation,BigInteger>{
     fun findBySample(sample : String) : List<HumanMethylation>
+    fun findBySampleIsIn(samples : List<String>) :  List<HumanMethylation>
 }
 interface IlluminaMethylationRepo : MongoRepository<IlluminaMethylation,BigInteger>{
     fun findBySample(sample: String) : List<IlluminaMethylation>
     fun findByGeneLike(gene : String) : List<IlluminaMethylation>
+    fun findByGene(gene : String) : List<IlluminaMethylation>
 }
 interface ClinicalRepo : MongoRepository<Clinical,BigInteger>{
     fun findByGsm(gsm : String) : List<Clinical>

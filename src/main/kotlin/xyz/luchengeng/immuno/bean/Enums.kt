@@ -1,8 +1,5 @@
 package xyz.luchengeng.immuno.bean
-interface Enumerable{
-    val value : Int
-}
-enum class Gender(override val value: Int) : Enumerable {
+enum class Gender(val value: Int) {
     MALE(1),
     FEMALE(2);
     companion object {
@@ -11,7 +8,7 @@ enum class Gender(override val value: Int) : Enumerable {
     }
 }
 
-enum class TNM(override val value : Int) : Enumerable{
+enum class TNM(val value : Int){
     STAGE1(1),
     STAGE2(2),
     STAGE3(3),
@@ -22,7 +19,7 @@ enum class TNM(override val value : Int) : Enumerable{
     }
 }
 
-enum class Race(override val value : Int) : Enumerable{
+enum class Race(val value : Int){
     WHITE(1),
     ASIAN(2),
     BLACK(3);

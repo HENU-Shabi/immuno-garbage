@@ -18,26 +18,6 @@ class ClinicalDataImport @Autowired constructor(
         private val illuminaMethylationRepo: IlluminaMethylationRepo,
         private val clinicalRepo: ClinicalRepo) {
     private val clinicalInfoList = listOf("gender", "race", "tnm")
-    private fun enumerableMapOf(row: CsvRow, first: CsvRow) : Map<String,Enumerable> =
-         mutableMapOf<String,Enumerable>().apply {
-            clinicalInfoList.forEach {
-                when(it){
-                    "gender"->{
-                        if(Gender.fromInt(dataFromColumnName("gender",first,row)?.toInt()) != null)
-                            this[it] = Gender.fromInt(dataFromColumnName("gender",first,row)?.toInt()) as Enumerable
-                    }
-                    "race" ->{
-                        if(Race.fromInt(dataFromColumnName("race",first,row)?.toInt()) != null)
-                            this[it] = Race.fromInt(dataFromColumnName("race",first,row)?.toInt()) as Enumerable
-                    }
-                    "tnm" ->{
-                        if(TNM.fromInt(dataFromColumnName("tnm",first,row)?.toInt()) != null)
-                            this[it] = TNM.fromInt(dataFromColumnName("tnm",first,row)?.toInt()) as Enumerable
-                    }
-                }
-            }
-        }
-
 
     operator fun invoke(filePath: String) {
         with(CsvReader().parse(File(filePath), StandardCharsets.UTF_8)) {
@@ -45,7 +25,10 @@ class ClinicalDataImport @Autowired constructor(
             while(true){
                 val row = this.nextRow()
                 if(row != null) row.apply {
-                    val cli =  Clinical(null, dataFromColumnName("GSM",first,row)!!, eventMapOf(first,row),enumerableMapOf(row, first))
+                    val cli =  Clinical(null, dataFromColumnName("GSM",first,row)!!, eventMapOf(first,row),
+                            Gender.fromInt(dataFromColumnName("gender",first,row)?.toInt()),
+                            TNM.fromInt(dataFromColumnName("tnm",first,row)?.toInt()),
+                            Race.fromInt(dataFromColumnName("race",first,row)?.toInt()))
                     clinicalRepo.save(cli)
                 }else break
             }
