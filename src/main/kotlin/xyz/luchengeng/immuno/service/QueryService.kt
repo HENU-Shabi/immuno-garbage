@@ -3,11 +3,12 @@ package xyz.luchengeng.immuno.service
 import de.siegmar.fastcsv.writer.CsvWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import xyz.luchengeng.immuno.bean.DataFrameEntry
-import xyz.luchengeng.immuno.bean.HumanMethylation
+import org.springframework.web.bind.annotation.RequestHeader
+import xyz.luchengeng.immuno.bean.*
 import xyz.luchengeng.immuno.repo.ClinicalRepo
 import xyz.luchengeng.immuno.repo.HumanMethylationRepo
 import xyz.luchengeng.immuno.repo.IlluminaMethylationRepo
+import xyz.luchengeng.immuno.util.IlluminaMethylationDataImport
 import java.io.File
 import java.io.FileReader
 import java.io.StringWriter
@@ -19,14 +20,14 @@ class QueryService @Autowired constructor(
         private val humanMethylationRepo: HumanMethylationRepo,
         private val illuminaMethylationRepo: IlluminaMethylationRepo,
         private val clinicalRepo: ClinicalRepo) {
-    fun averageValueEventQuery(event : String,gene : String) : List<DataFrameEntry>{
+    private fun averageValueEventQuery(event : String, gene : String,filter : (String)->Boolean) : List<DataFrameEntry>{
         val geneVals = mutableListOf<HumanMethylation>().apply {
             this.addAll(humanMethylationRepo.findBySampleIsIn(illuminaMethylationRepo.findByGene(gene).map { it.sample }))
         }
         val avgMap = mutableMapOf<String,Double>().apply {
             mutableMapOf<String, Double>().apply {
-                geneVals.forEach {
-                    it.methylationMap.forEach { (str, double) ->
+                geneVals.forEach { humanMethylation ->
+                    humanMethylation.methylationMap.filter { filter(it.key) }.forEach { (str, double) ->
                         this[str] = this[str] ?: 0 + double
                     }
                 }
@@ -51,7 +52,7 @@ class QueryService @Autowired constructor(
         return entries
     }
 
-    fun listToCsv(list : List<DataFrameEntry>) : String{
+    private fun listToCsv(list : List<DataFrameEntry>) : String{
         //val temp = File.createTempFile("dataFrame","csv")
         val temp = StringWriter()
         with(CsvWriter().append(temp)){
@@ -64,4 +65,18 @@ class QueryService @Autowired constructor(
         }
        return temp.buffer.toString()
     }
+    operator fun invoke(event : String, gene : String,tnm : TNM?,gender : Gender?,race : Race?)
+        = this.listToCsv(this.averageValueEventQuery(event, gene) {
+            var flag = true
+            if (tnm != null) {
+                flag = flag && (clinicalRepo.findByGsm(it)[0].tnm == tnm)
+            }
+            if (gender != null) {
+                flag = flag && (clinicalRepo.findByGsm(it)[0].gender == gender)
+            }
+            if (race != null) {
+                flag = flag && (clinicalRepo.findByGsm(it)[0].race == race)
+            }
+            flag
+        })
 }

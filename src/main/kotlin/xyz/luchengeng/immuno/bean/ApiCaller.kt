@@ -5,10 +5,14 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
 
-class ApiCaller(private val hosts: Array<String>, private val timeRetry: Int) {
+class ApiCaller(private val hosts: Array<String>,
+                private val timeRetry: Int,
+                private val hostQueue : LinkedBlockingQueue<RHost>,
+                private val poolProperties: PoolProperties) {
     private val hostList : List<Host> = hosts.map { Host(it) }
     class Host(private val host : String, private val lock : Lock = ReentrantLock()){
         operator fun component1() = host
@@ -24,15 +28,13 @@ class ApiCaller(private val hosts: Array<String>, private val timeRetry: Int) {
     }
     class BackEndBusyException : RuntimeException()
     fun call(request: Request):Response{
-        for( i in 1..timeRetry) {
-            for ((host, lock) in hostList) {
-                if (lock.tryLock()) {
-                    val response = Response(host, request)
-                    lock.unlock()
-                    return response
-                }
-            }
+        var hostOrNull = hostQueue.poll()
+        if(hostOrNull == null){
+           poolProperties.additionRequestCount++
+            hostOrNull = hostQueue.take()
         }
-        throw BackEndBusyException()
+        val response =  Response("http://127.0.0.1:${hostOrNull.port}",request)
+        hostQueue.put(hostOrNull)
+        return response
     }
 }

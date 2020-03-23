@@ -18,7 +18,6 @@ class ImmunoApplicationTests @Autowired constructor(val clinicalDataImport: Clin
 
     @Test
     fun contextLoads() {
-        val str = queryService.listToCsv(queryService.averageValueEventQuery("OS","MIR148A"))
     }
 
 }
