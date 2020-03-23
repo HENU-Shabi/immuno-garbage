@@ -16,5 +16,7 @@ class PlotService @Autowired constructor(private val caller: ApiCaller,
                                          private val queryService: QueryService,
                                          private val illuminaMethylationRepo: IlluminaMethylationRepo) {
     operator fun invoke(id : BigInteger,event : String,race: Race?,tnm: TNM?,gender: Gender?) : ByteArray =
-        illuminaMethylationRepo.findByIdOrNull(id).run { caller.call(ApiCaller.Request(queryService(event,this?.gene?:throw NotFoundException(),tnm,gender,race),this.gene,event)).plotPngByteArray }
+        illuminaMethylationRepo.findByIdOrNull(id).run {
+            caller.call(ApiCaller.Request(queryService(event,this?.gene?:throw NotFoundException(),tnm,gender,race),this.gene,event)).plotPngByteArray
+        }
 }
