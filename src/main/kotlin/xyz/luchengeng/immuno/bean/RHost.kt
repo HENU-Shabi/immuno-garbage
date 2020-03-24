@@ -26,7 +26,7 @@ class StreamGobbler(ist: InputStream) : Thread() {
         try {
             val isr = InputStreamReader(ist)
             val br = BufferedReader(isr)
-            var line: String? = null
+            var line: String?
             while (br.readLine().also { line = it } != null) println(line)
         } catch (ioe: IOException) {
             ioe.printStackTrace()
