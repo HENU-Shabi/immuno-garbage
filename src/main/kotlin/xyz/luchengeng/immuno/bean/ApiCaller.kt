@@ -5,6 +5,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.net.ConnectException
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.locks.Lock
 import java.util.concurrent.locks.ReentrantLock
@@ -33,7 +34,12 @@ class ApiCaller(private val hosts: Array<String>,
            poolProperties.additionRequestCount++
             hostOrNull = hostQueue.take()
         }
-        val response =  Response("http://127.0.0.1:${hostOrNull.port}",request)
+        val response : Response
+        try{
+              response = Response("http://127.0.0.1:${hostOrNull.port}",request)
+        }catch (e : ConnectException){
+            return call(request)
+        }
         hostQueue.put(hostOrNull)
         return response
     }
