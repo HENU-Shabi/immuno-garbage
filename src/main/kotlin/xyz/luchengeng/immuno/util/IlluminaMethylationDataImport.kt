@@ -18,9 +18,9 @@ class IlluminaMethylationDataImport @Autowired constructor(
         private val clinicalRepo: ClinicalRepo) {
     private val propToColumnMap = mapOf("sample" to "#id",
             "gene" to "gene",
-            "chromosome" to "chrom",
-            "chromosomeStart" to "chromStart",
-            "chromosomeEnd" to "chromEnd")
+            "genomicRegion" to "genomicRegion",
+            "methylationPosition" to "methylationPosition",
+            "relationToIsland" to "relationToIsland")
     private fun dataFromColumnName(name: String, firstRow: CsvRow, targetRow: CsvRow): String?  {
         val first = firstRow.fields
         val target = targetRow.fields
@@ -42,9 +42,9 @@ class IlluminaMethylationDataImport @Autowired constructor(
                     val cli =  IlluminaMethylation(null,
                             dataFromColumnName(propToColumnMap["sample"]!!,first,this)!!,
                             dataFromColumnName(propToColumnMap["gene"]!!,first,this),
-                            dataFromColumnName(propToColumnMap["chromosome"]!!,first,this),
-                            dataFromColumnName(propToColumnMap["chromosomeStart"]!!,first,this)?.toLong(),
-                            dataFromColumnName(propToColumnMap["chromosomeEnd"]!!,first,this)?.toLong())
+                            dataFromColumnName(propToColumnMap["genomicRegion"]!!,first,this),
+                            dataFromColumnName(propToColumnMap["methylationPosition"]!!,first,this),
+                            dataFromColumnName(propToColumnMap["relationToIsland"]!!,first,this))
                     illuminaMethylationRepo.save(cli)
                 }else break
             }

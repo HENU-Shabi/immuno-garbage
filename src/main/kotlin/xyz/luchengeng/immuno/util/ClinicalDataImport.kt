@@ -28,7 +28,10 @@ class ClinicalDataImport @Autowired constructor(
                     val cli =  Clinical(null, dataFromColumnName("GSM",first,row)!!, eventMapOf(first,row),
                             Gender.fromInt(dataFromColumnName("gender",first,row)?.toInt()),
                             TNM.fromInt(dataFromColumnName("tnm",first,row)?.toInt()),
-                            Race.fromInt(dataFromColumnName("race",first,row)?.toInt()))
+                            Race.fromInt(dataFromColumnName("race",first,row)?.toInt()),
+                            RadiationTherapy.fromInt(dataFromColumnName("radiationTherapy",first,row)?.toInt()),
+                            Recurrence.fromInt(dataFromColumnName("recurrence",first,row)?.toInt()),
+                            Metastasis.fromInt(dataFromColumnName("metastasis",first,row)?.toInt()))
                     clinicalRepo.save(cli)
                 }else break
             }

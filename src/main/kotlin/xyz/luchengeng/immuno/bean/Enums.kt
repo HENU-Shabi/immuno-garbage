@@ -28,3 +28,30 @@ enum class Race(val value : Int){
         fun fromInt(type: Int?) = map[type]
     }
 }
+
+enum class RadiationTherapy(val value : Int){
+    TRUE(1),
+    FALSE(0);
+    companion object {
+        private val map = RadiationTherapy.values().associateBy(RadiationTherapy::value)
+        fun fromInt(type: Int?) = map[type]
+    }
+}
+
+enum class Recurrence(val value : Int){
+    TRUE(1),
+    FALSE(0);
+    companion object {
+        private val map = Recurrence.values().associateBy(Recurrence::value)
+        fun fromInt(type: Int?) = map[type]
+    }
+}
+
+enum class Metastasis(val value : Int){
+    DISTANT(1),
+    LOCOREGIONAL(2);
+    companion object {
+        private val map = Metastasis.values().associateBy(Metastasis::value)
+        fun fromInt(type: Int?) = map[type]
+    }
+}
