@@ -28,7 +28,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     implementation("com.beust:jcommander:1.78")
     implementation("org.apache.commons:commons-exec:1.3")
-    implementation("com.github.HENU-Shabi:callr:1e9ac29ea7")
+    implementation("com.github.HENU-Shabi:callr:0d15c65852")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.3")
     implementation("com.squareup.okhttp3:okhttp:4.4.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
