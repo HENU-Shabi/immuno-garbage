@@ -12,9 +12,11 @@ import org.springframework.core.task.TaskExecutor
 import xyz.luchengeng.immuno.repo.ClinicalRepo
 import xyz.luchengeng.immuno.repo.HumanMethylationRepo
 import xyz.luchengeng.immuno.repo.IlluminaMethylationRepo
+import xyz.luchengeng.immuno.repo.MRNAMethylationRepo
 import xyz.luchengeng.immuno.util.ClinicalDataImport
 import xyz.luchengeng.immuno.util.HumanMethylationDataImport
 import xyz.luchengeng.immuno.util.IlluminaMethylationDataImport
+import xyz.luchengeng.immuno.util.MRNAMethylationDataImport
 import java.util.*
 import kotlin.system.exitProcess
 
@@ -29,6 +31,9 @@ class Args {
     @Parameter(names = ["--import-illumina-methyl"], description = "CSV files containing illumina methylation data")
     var illuminaMethylFiles: List<String> = ArrayList()
 
+    @Parameter(names = ["--import-mRNA-methyl"], description = "CSV files containing mRNA methylation data")
+    var mRNAMethylFiles: List<String> = ArrayList()
+
     @Parameter(names = ["--clear-clinical-data"], description = "delete clinical data in DB")
     var clearClinicalData : Boolean = false
 
@@ -37,6 +42,9 @@ class Args {
 
     @Parameter(names = ["--clear-illumina-methyl"], description = "delete illumina methylation data in DB")
     var clearIlluminaMethyl : Boolean = false
+
+    @Parameter(names = ["--clear-mRNA-methyl"], description = "delete mRNA methylation data in DB")
+    var clearMRNAMethyl : Boolean = false
 
     @Parameter(names = ["--help"])
     var help = false
@@ -47,9 +55,11 @@ class ImmunoApplication @Autowired constructor(private val env : Environment,
                                                private val clinicalDataImport: ClinicalDataImport,
                                                private val clinicalRepo: ClinicalRepo,
                                                private val humanMethylationRepo: HumanMethylationRepo,
+                                               private val mrnaMethylationRepo: MRNAMethylationRepo,
                                                private val humanMethylationDataImport: HumanMethylationDataImport,
                                                private val illuminaMethylationRepo: IlluminaMethylationRepo,
-                                               private val illuminaMethylationDataImport: IlluminaMethylationDataImport) : CommandLineRunner {
+                                               private val illuminaMethylationDataImport: IlluminaMethylationDataImport,
+                                               private val mrnaMethylationDataImport: MRNAMethylationDataImport) : CommandLineRunner {
     override fun run(vararg args: String?) {
         val argObj = Args()
         if(!env.containsProperty("spring.data.mongodb.uri")){
@@ -66,9 +76,11 @@ class ImmunoApplication @Autowired constructor(private val env : Environment,
         if(argObj.clearIlluminaMethyl ||
                 argObj.clearHumanMethyl ||
                 argObj.clearClinicalData ||
+                argObj.clearMRNAMethyl ||
                 argObj.clinicalDataFiles.isNotEmpty() ||
                 argObj.humanMethylFiles.isNotEmpty() ||
-                argObj.illuminaMethylFiles.isNotEmpty()) {
+                argObj.illuminaMethylFiles.isNotEmpty() ||
+                argObj.mRNAMethylFiles.isNotEmpty()) {
             if (argObj.clearClinicalData) {
                 clinicalRepo.deleteAll()
             }
@@ -78,6 +90,9 @@ class ImmunoApplication @Autowired constructor(private val env : Environment,
             if (argObj.clearIlluminaMethyl) {
                 illuminaMethylationRepo.deleteAll()
             }
+            if(argObj.clearMRNAMethyl){
+                mrnaMethylationRepo.deleteAll();
+            }
             argObj.clinicalDataFiles.forEach {
                 clinicalDataImport(it)
             }
@@ -86,6 +101,9 @@ class ImmunoApplication @Autowired constructor(private val env : Environment,
             }
             argObj.illuminaMethylFiles.forEach {
                 illuminaMethylationDataImport(it)
+            }
+            argObj.mRNAMethylFiles.forEach {
+                mrnaMethylationDataImport(it)
             }
             exitProcess(0)
         }

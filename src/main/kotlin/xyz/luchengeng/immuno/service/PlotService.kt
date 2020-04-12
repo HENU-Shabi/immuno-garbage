@@ -23,4 +23,11 @@ class PlotService @Autowired constructor(private val queryService: QueryService,
                 post(queryService(event,this@run.gene,tnm,gender,race).toRequestBody("text/csv".toMediaType()))
             }.body!!.bytes()
         }
+
+    fun plotLinear(gene : String,sample : String) : ByteArray {
+        val ok = hostPool("/linear") {
+            post(queryService.linearPlotQuery(gene, sample).toRequestBody("text/csv".toMediaType()))
+        }
+        return ok.body!!.bytes()
+    }
 }

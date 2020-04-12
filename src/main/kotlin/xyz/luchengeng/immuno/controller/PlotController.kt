@@ -1,6 +1,7 @@
 package xyz.luchengeng.immuno.controller
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.RequestEntity
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,4 +24,9 @@ class PlotController @Autowired constructor(private val plotService: PlotService
                 @RequestHeader("x-sample-tnm",required = false) tnm : TNM?,
                 @RequestHeader("x-sample-gender",required = false)gender : Gender?) : ResponseEntity<ByteArray> =
             ResponseEntity.ok(plotService(geneId,event,race,tnm,gender))
+
+    @RequestMapping(value = ["/linear/{gene}/{sample}"],method = [RequestMethod.GET],produces = ["image/png"])
+    fun getLinear(@PathVariable("gene") gene : String,@PathVariable("sample") sample : String) : ResponseEntity<ByteArray> =
+        ResponseEntity.ok(plotService.plotLinear(gene,sample))
+
 }

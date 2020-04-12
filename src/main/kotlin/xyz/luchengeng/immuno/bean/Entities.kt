@@ -11,6 +11,11 @@ data class HumanMethylation(@Id var id : BigInteger?,
                             val methylationMap : Map<String,Double>)
 
 @Document
+data class MRNAMethylation(@Id var id : BigInteger?,
+                            @Indexed val sample : String,
+                            val methylationMap : Map<String,Double>)
+
+@Document
 data class IlluminaMethylation(@Id var id : BigInteger?,
                                @Indexed val sample: String,
                                @Indexed val gene : String?,
@@ -35,10 +40,13 @@ class EventPair(val n : Int?, val value : Int?){
     operator fun component2() = value
 }
 
-data class DataFrameEntry(val gsmName : String,
-                          var eventName : String?,
-                          var eventN : Int?,
-                          var eventValue : Int?,
-                          val geneValue : Double){
+data class CoxDataFrameEntry(val gsmName : String,
+                             var eventName : String?,
+                             var eventN : Int?,
+                             var eventValue : Int?,
+                             val geneValue : Double){
     constructor(geneName: String,eventName : String, eventPair: EventPair,geneValue: Double) : this(geneName,eventName,eventPair.n!!, eventPair.value!!, geneValue)
 }
+
+data class LinearDataFrameEntry(val mRNAValue : Double,
+                                val humanValue : Double)

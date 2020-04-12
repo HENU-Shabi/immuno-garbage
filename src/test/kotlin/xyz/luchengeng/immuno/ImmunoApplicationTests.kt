@@ -18,6 +18,7 @@ class ImmunoApplicationTests @Autowired constructor(val clinicalDataImport: Clin
 
     @Test
     fun contextLoads() {
+        println(queryService.linearPlotQuery("ARHGEF10L","cg13332474"))
     }
 
 }

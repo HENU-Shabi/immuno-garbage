@@ -3,24 +3,20 @@ package xyz.luchengeng.immuno.service
 import de.siegmar.fastcsv.writer.CsvWriter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.web.bind.annotation.RequestHeader
 import xyz.luchengeng.immuno.bean.*
 import xyz.luchengeng.immuno.repo.ClinicalRepo
 import xyz.luchengeng.immuno.repo.HumanMethylationRepo
 import xyz.luchengeng.immuno.repo.IlluminaMethylationRepo
-import xyz.luchengeng.immuno.util.IlluminaMethylationDataImport
-import java.io.File
-import java.io.FileReader
+import xyz.luchengeng.immuno.repo.MRNAMethylationRepo
 import java.io.StringWriter
-import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 
 @Service
 class QueryService @Autowired constructor(
         private val humanMethylationRepo: HumanMethylationRepo,
         private val illuminaMethylationRepo: IlluminaMethylationRepo,
+        private val mrnaMethylationRepo: MRNAMethylationRepo,
         private val clinicalRepo: ClinicalRepo) {
-    private fun averageValueEventQuery(event : String, gene : String,filter : (String)->Boolean) : List<DataFrameEntry>{
+    private fun averageValueEventQuery(event : String, gene : String,filter : (String)->Boolean) : List<CoxDataFrameEntry>{
         val geneVals = mutableListOf<HumanMethylation>().apply {
             this.addAll(humanMethylationRepo.findBySampleIsIn(illuminaMethylationRepo.findByGene(gene).map { it.sample }))
         }
@@ -35,9 +31,9 @@ class QueryService @Autowired constructor(
                 this[it.key] = it.value / geneVals.size
             }
         }
-        val entries = mutableListOf<DataFrameEntry>().apply {
+        val entries = mutableListOf<CoxDataFrameEntry>().apply {
             avgMap.forEach {
-                this.add(DataFrameEntry(it.key,eventName = null,eventN = null,geneValue = it.value,eventValue = null))
+                this.add(CoxDataFrameEntry(it.key,eventName = null,eventN = null,geneValue = it.value,eventValue = null))
             }
         }
         entries.forEach {
@@ -52,7 +48,28 @@ class QueryService @Autowired constructor(
         return entries
     }
 
-    private fun listToCsv(list : List<DataFrameEntry>) : String{
+    fun linearPlotQuery(gene : String,sample : String): String {
+        val list = mutableListOf<LinearDataFrameEntry>()
+        val human = humanMethylationRepo.findFirstBySample(sample)!!
+        val mRna = mrnaMethylationRepo.findFirstBySample(gene)
+        human.methylationMap.forEach { key, value ->
+            if(mRna!!.methylationMap[key] !== null) {
+                list.add(LinearDataFrameEntry(mRna!!.methylationMap[key]!!, value))
+            }
+        }
+        val temp = StringWriter()
+        with(CsvWriter().append(temp)){
+            this.appendLine("Methylation","mRNA")
+            for(l in list){
+                this.appendLine(l.mRNAValue.toString(),l.humanValue.toString())
+            }
+            this.flush()
+            this.close()
+        }
+        return temp.buffer.toString()
+    }
+
+    private fun listToCsv(list : List<CoxDataFrameEntry>) : String{
         //val temp = File.createTempFile("dataFrame","csv")
         val temp = StringWriter()
         with(CsvWriter().append(temp)){

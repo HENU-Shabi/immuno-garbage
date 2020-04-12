@@ -1,4 +1,4 @@
-#' Echo the parameter that was sent in
+#' Plot
 #' @png
 #' @post /plot/<strAvg>
 function(req, strAvg)
@@ -33,4 +33,14 @@ function(req, strAvg)
   ggsurv$plot <- ggsurv$plot + ggplot2::annotate("text", x = gmax[1, 1] * 0.5, y = 0.95, label = strAvg, size = 5);
   print(ggsurv);
   #ggsave(file = "plot.png", width=6,height=6, type = "cairo",print(ggsurv))
+}
+
+#' Linear
+#' @png
+#' @post /linear
+function(req){
+  raw <- req$postBody;
+  res <- read.csv(text = raw);
+  ggsurv<-ggplot(res,aes(x=mRNA,y=Methylation))+geom_point()+labs(x = "mRNA(log2(norm_count+1))", y = "Methylation")+geom_smooth(method=lm)+stat_cor(data=res, method = "pearson",size=5)+ theme(plot.title = element_text(size = 20),axis.text=element_text(size=12,face = "bold"),axis.title.x=element_text(size=14),axis.title.y=element_text(size=14))
+  print(ggsurv)
 }
